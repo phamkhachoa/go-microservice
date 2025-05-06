@@ -1,0 +1,28 @@
+server:
+  port: ${SERVER_PORT:8080}
+  mode: "${SERVER_MODE:dev}"
+mysql:
+  host: "${MYSQL_HOST:127.0.0.1}"
+  port: ${MYSQL_PORT:33306}
+  username: "${MYSQL_USERNAME:root}"
+  password: "${MYSQL_PASSWORD:root1234}"
+  dbname: "${MYSQL_DBNAME:shopdevgo}"
+  max_idle_conns: ${MYSQL_MAX_IDLE_CONNS:10}
+  max_open_conns: ${MYSQL_MAX_OPEN_CONNS:100}
+  conn_max_lifetime: ${MYSQL_CONN_MAX_LIFETIME:3600}
+logger:
+  log_level: "${LOGGER_LEVEL:debug}"
+  file_log_name: "${LOGGER_FILE_NAME:./storages/logs/dev.001.log}"
+  max_backups: ${LOGGER_MAX_BACKUPS:30}
+  max_age: ${LOGGER_MAX_AGE:7}
+  max_size: ${LOGGER_MAX_SIZE:1024}
+  compress: ${LOGGER_COMPRESS:true}
+redis:
+  host: "${REDIS_HOST:127.0.0.1}"
+  port: ${REDIS_PORT:6331}
+  password: "${REDIS_PASSWORD:}"
+  database: ${REDIS_DATABASE:0}
+jwt:
+  TOKEN_HOUR_LIFESPAN: ${JWT_TOKEN_HOUR_LIFESPAN:1}
+  JWT_EXPIRATION: "${JWT_EXPIRATION:1h}"
+  API_SECRET: "${JWT_API_SECRET:xxx.yyy.zzz}"

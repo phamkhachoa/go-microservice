@@ -1,0 +1,11 @@
+greeting: "Xin chào!"
+welcome: "Chào mừng, {{.Name}}!"
+product_not_found: "Không tìm thấy sản phẩm"
+internal_server_error: "Lỗi máy chủ nội bộ"
+bad_request: "Yêu cầu không hợp lệ"
+unauthorized: "Không được phép truy cập"
+forbidden: "Truy cập bị cấm"
+not_found: "Không tìm thấy"
+internal_error: "Lỗi máy chủ nội bộ"
+service_unavailable: "Dịch vụ không khả dụng"
+# Add other message codes and their translations

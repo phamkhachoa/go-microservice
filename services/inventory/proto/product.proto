@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package product;
+
+option go_package = "go-ecommerce-backend-api/proto";
+
+service ProductService {
+  rpc GetProductByID(GetProductRequest) returns (ProductResponse) {}
+}
+
+message GetProductRequest {
+  int64 id = 1;
+}
+
+message ProductResponse {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+  optional double discount_price = 5;
+  int32 quantity = 6;
+  optional int64 category_id = 7;
+  string thumbnail = 8;
+  map<string, string> images = 9;
+  map<string, string> attributes = 10;
+  int32 status = 11;
+}
