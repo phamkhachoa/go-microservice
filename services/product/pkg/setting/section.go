@@ -1,10 +1,11 @@
 package setting
 
 type Config struct {
-	Server ServerSetting `mapstructure:"server"`
-	Mysql  MysqlSetting  `mapstructure:"mysql"`
-	Logger LoggerSetting `mapstructure:"logger"`
-	Redis  RedisSetting  `mapstructure:"redis"`
+	Server     ServerSetting     `mapstructure:"server"`
+	Mysql      MysqlSetting      `mapstructure:"mysql"`
+	Logger     LoggerSetting     `mapstructure:"logger"`
+	Redis      RedisSetting      `mapstructure:"redis"`
+	GrpcServer GrpcServerSetting `mapstructure:"grpc"`
 }
 
 type MysqlSetting struct {
@@ -21,6 +22,10 @@ type MysqlSetting struct {
 type ServerSetting struct {
 	Port int    `mapstructure:"port"`
 	Mode string `mapstructure:"mode"`
+}
+
+type GrpcServerSetting struct {
+	InventoryGrpcServer string `mapstructure:"inventory_grpc_server"`
 }
 
 type LoggerSetting struct {

@@ -24,14 +24,14 @@ func InitRouter() *gin.Engine {
 	//r.Use() // logging
 	//r.Use() // cross
 	//r.Use() // limiter
-	productRouter := router.RouterGroupApp.Product
+	inventoryRouter := router.RouterGroupApp.Inventory
 
 	MainGroup := r.Group("/v1/2024")
 	{
 		MainGroup.GET("/check-status")
 	}
 	{
-		productRouter.InitRouter(MainGroup)
+		inventoryRouter.InitRouter(MainGroup)
 	}
 	return r
 }

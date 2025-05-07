@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go-ecommerce-backend-api/internal/client"
 	"time"
 
 	"go-ecommerce-backend-api/global"
@@ -19,13 +20,15 @@ import (
 )
 
 type productService struct {
-	productRepo repo.ProductRepo
+	productRepo     repo.ProductRepo
+	inventoryClient *client.InventoryClient
 }
 
 // NewProductService creates a new product service
-func NewProductService(productRepo repo.ProductRepo) service.IProductService {
+func NewProductService(productRepo repo.ProductRepo, inventoryClient *client.InventoryClient) service.IProductService {
 	return &productService{
-		productRepo: productRepo,
+		productRepo:     productRepo,
+		inventoryClient: inventoryClient,
 	}
 }
 
@@ -75,6 +78,12 @@ func (s *productService) GetProductByID(id int64) (*model.Product, error) {
 			return nil, errors.New("not_found")
 		}
 		return nil, err
+	}
+
+	// Get inventory information via gRPC
+	inventoryResp, err := s.inventoryClient.GetProductInventory(ctx, id)
+	if inventoryResp != nil && err == nil {
+		product.Quantity = int(inventoryResp.Quantity)
 	}
 
 	// Cache the product in Redis

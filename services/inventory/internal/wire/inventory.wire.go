@@ -10,10 +10,10 @@ import (
 	"github.com/google/wire"
 )
 
-func InitProductRouterHandler() (*controller.ProductController, error) {
+func InitInventoryRouterHandler() (*controller.InventoryController, error) {
 	wire.Build(
-		repoImpl.NewProductRepo,
-		serviceImpl.NewProductService,
-		controller.NewProductController)
-	return new(controller.ProductController), nil
+		repoImpl.NewInventoryRepo,
+		serviceImpl.NewInventoryService,
+		controller.NewInventoryController)
+	return new(controller.InventoryController), nil
 }

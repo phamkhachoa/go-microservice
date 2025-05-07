@@ -7,6 +7,7 @@
 package wire
 
 import (
+	"go-ecommerce-backend-api/internal/client"
 	"go-ecommerce-backend-api/internal/controller"
 	"go-ecommerce-backend-api/internal/repo/impl"
 	impl2 "go-ecommerce-backend-api/internal/service/impl"
@@ -16,7 +17,11 @@ import (
 
 func InitProductRouterHandler() (*controller.ProductController, error) {
 	productRepo := impl.NewProductRepo()
-	iProductService := impl2.NewProductService(productRepo)
+	inventoryClient, err := client.NewInventoryClient()
+	if err != nil {
+		return nil, err
+	}
+	iProductService := impl2.NewProductService(productRepo, inventoryClient)
 	productController := controller.NewProductController(iProductService)
 	return productController, nil
 }

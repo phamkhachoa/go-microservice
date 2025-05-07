@@ -8,15 +8,34 @@ package wire
 
 import (
 	"go-ecommerce-backend-api/internal/controller"
+	"go-ecommerce-backend-api/internal/grpc"
 	"go-ecommerce-backend-api/internal/repo/impl"
+	"go-ecommerce-backend-api/internal/service"
 	impl2 "go-ecommerce-backend-api/internal/service/impl"
 )
 
-// Injectors from product.wire.go:
+// Injectors from inventory.wire.go:
 
-func InitProductRouterHandler() (*controller.ProductController, error) {
-	productRepo := impl.NewProductRepo()
-	iProductService := impl2.NewProductService(productRepo)
-	productController := controller.NewProductController(iProductService)
-	return productController, nil
+func InitInventoryRouterHandler() (*controller.InventoryController, error) {
+	iInventoryRepo := impl.NewInventoryRepo()
+	iInventoryService := impl2.NewInventoryService(iInventoryRepo)
+	inventoryController := controller.NewInventoryController(iInventoryService)
+	return inventoryController, nil
+}
+
+// Injectors from inventory_pb.wire.go:
+
+// InitInventoryGrpcServer initializes the gRPC server
+func InitInventoryGrpcServer() (*grpc.InventoryServer, error) {
+	iInventoryRepo := impl.NewInventoryRepo()
+	iInventoryService := impl2.NewInventoryService(iInventoryRepo)
+	inventoryServer := provideInventoryServer(iInventoryService)
+	return inventoryServer, nil
+}
+
+// inventory_pb.wire.go:
+
+// provideInventoryServer creates a new inventory gRPC server
+func provideInventoryServer(inventoryService service.IInventoryService) *grpc.InventoryServer {
+	return grpc.NewInventoryServer(inventoryService)
 }

@@ -15,7 +15,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8002",
+    "host": "localhost:8080",
     "basePath": "/v1/2024",
     "paths": {},
     "securityDefinitions": {
