@@ -94,3 +94,9 @@
 {"level":"INFO","time":"2025-05-07T21:57:28.210+0700","caller":"initialize/mysql.go:26","msg":"Init mysql with config %s","config":"root:root1234@tcp(127.0.0.1:33306)/shopdevgo?charset=utf8mb4&parseTime=True&loc=Local"}
 {"level":"INFO","time":"2025-05-07T21:57:28.217+0700","caller":"initialize/mysql.go:31","msg":"Init mysql success"}
 {"level":"INFO","time":"2025-05-07T21:57:28.220+0700","caller":"initialize/redis.go:27","msg":"Redis initialization success"}
+{"level":"INFO","time":"2025-05-07T23:23:38.511+0700","caller":"initialize/mysql.go:26","msg":"Init mysql with config %s","config":"root:root1234@tcp(127.0.0.1:33306)/shopdevgo?charset=utf8mb4&parseTime=True&loc=Local"}
+{"level":"INFO","time":"2025-05-07T23:23:38.518+0700","caller":"initialize/mysql.go:31","msg":"Init mysql success"}
+{"level":"INFO","time":"2025-05-07T23:23:38.520+0700","caller":"initialize/redis.go:27","msg":"Redis initialization success"}
+{"level":"INFO","time":"2025-05-07T23:24:37.150+0700","caller":"initialize/mysql.go:26","msg":"Init mysql with config %s","config":"root:root1234@tcp(127.0.0.1:33306)/shopdevgo?charset=utf8mb4&parseTime=True&loc=Local"}
+{"level":"INFO","time":"2025-05-07T23:24:37.156+0700","caller":"initialize/mysql.go:31","msg":"Init mysql success"}
+{"level":"INFO","time":"2025-05-07T23:24:37.160+0700","caller":"initialize/redis.go:27","msg":"Redis initialization success"}

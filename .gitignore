@@ -1,2 +1,2 @@
-services/product/storages/logs/*
-services/inventory/storages/logs/*
+services/product/storages/logs/
+services/inventory/storages/logs/

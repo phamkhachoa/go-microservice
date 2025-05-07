@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"go-ecommerce-backend-api/global"
 	"go-ecommerce-backend-api/internal/initialize"
 	"go-ecommerce-backend-api/internal/wire"
@@ -16,8 +18,6 @@ import (
 	"strconv"
 	"syscall"
 )
-import "github.com/swaggo/gin-swagger" // gin-swagger middleware
-import "github.com/swaggo/files"       // swagger embed files
 
 // @title           Swagger Example API
 // @version         1.0
@@ -39,48 +39,58 @@ import "github.com/swaggo/files"       // swagger embed files
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
+	// Initialize Gin router
 	r := initialize.Run()
 
-	// grpc
-	// Get port from environment or use default
-	port := os.Getenv("GRPC_PORT")
-	if port == "" {
-		port = "50051"
+	// Configure Gin routes
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Start HTTP server in a goroutine
+	go func() {
+		httpPort := strconv.Itoa(global.Config.Server.Port)
+		global.Logger.Info("Starting HTTP server", zap.String("port", httpPort))
+		if err := r.Run(":" + httpPort); err != nil {
+			global.Logger.Error("Failed to start HTTP server", zap.Error(err))
+		}
+	}()
+
+	// Get gRPC port from environment or use default
+	grpcPort := os.Getenv("GRPC_PORT")
+	if grpcPort == "" {
+		grpcPort = "50051"
 	}
 
-	// Create listener
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+	// Create gRPC listener
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", grpcPort))
 	if err != nil {
-		global.Logger.Error("Failed to listen", zap.Error(err), zap.String("port", port))
+		global.Logger.Error("Failed to listen", zap.Error(err), zap.String("port", grpcPort))
+		return
 	}
 
 	// Create gRPC server
 	server := grpcServer.NewServer()
 
-	// register our grpc services
+	// Register our gRPC services
 	inventoryServer, _ := wire.InitInventoryGrpcServer()
-	// register the OrderServiceServer
 	inventoryPb.RegisterInventoryServiceServer(server, inventoryServer)
 
-	// Start server in a goroutine
+	// Start gRPC server in a goroutine
 	go func() {
-		// Start server in a goroutine
-		global.Logger.Info("Starting gRPC server", zap.String("port", port))
+		global.Logger.Info("Starting gRPC server", zap.String("port", grpcPort))
 		if err := server.Serve(lis); err != nil {
-			global.Logger.Error("Failed to serve", zap.Error(err))
+			global.Logger.Error("Failed to serve gRPC", zap.Error(err))
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shut down the server
+	// Wait for interrupt signal to gracefully shut down both servers
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	global.Logger.Info("Shutting down gRPC server...")
+	global.Logger.Info("Shutting down servers...")
 	server.GracefulStop()
-	global.Logger.Info("Server stopped")
-
-	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	r.Run(":" + strconv.Itoa(global.Config.Server.Port))
+	global.Logger.Info("gRPC server stopped")
+	// Note: Gin doesn't have a built-in graceful shutdown, but you could implement one if needed
+	global.Logger.Info("HTTP server stopped")
 }
