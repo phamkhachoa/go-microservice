@@ -179,3 +179,9 @@
 {"level":"INFO","time":"2025-05-07T09:01:40.988+0700","caller":"grpc/inventory_server.go:84","msg":"Successfully retrieved inventory","product_id":1,"quantity":245,"available":245}
 {"level":"INFO","time":"2025-05-07T09:01:42.806+0700","caller":"grpc/inventory_server.go:41","msg":"Received request for inventory by product ID","product_id":1}
 {"level":"INFO","time":"2025-05-07T09:01:42.810+0700","caller":"grpc/inventory_server.go:84","msg":"Successfully retrieved inventory","product_id":1,"quantity":245,"available":245}
+{"level":"INFO","time":"2025-05-07T21:50:39.845+0700","caller":"initialize/mysql.go:26","msg":"Init mysql with config %s","config":"root:root1234@tcp(127.0.0.1:33306)/shopdevgo_inventory?charset=utf8mb4&parseTime=True&loc=Local"}
+{"level":"INFO","time":"2025-05-07T21:50:39.850+0700","caller":"initialize/mysql.go:31","msg":"Init mysql success"}
+{"level":"INFO","time":"2025-05-07T21:50:39.852+0700","caller":"initialize/redis.go:27","msg":"Redis initialization success"}
+{"level":"INFO","time":"2025-05-07T21:50:39.853+0700","caller":"server/main.go:68","msg":"Starting gRPC server","port":"50051"}
+{"level":"INFO","time":"2025-05-07T21:51:29.485+0700","caller":"grpc/inventory_server.go:41","msg":"Received request for inventory by product ID","product_id":1}
+{"level":"INFO","time":"2025-05-07T21:51:29.489+0700","caller":"grpc/inventory_server.go:84","msg":"Successfully retrieved inventory","product_id":1,"quantity":245,"available":245}

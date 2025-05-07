@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	_ "go-ecommerce-backend-api/cmd/swag/docs" // which is the generated folder after swag init
 	"go-ecommerce-backend-api/global"
 	"go-ecommerce-backend-api/internal/initialize"
 	"strconv"
@@ -33,5 +34,10 @@ func main() {
 	r := initialize.Run()
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	//r.GET("/swagger/doc.json", func(w http.ResponseWriter, _ *http.Request) {
+	//	w.Header().Set("Content-Type", "application/json")
+	//	w.WriteHeader(200)
+	//	w.Write([]byte(docs.SwaggerInfo.ReadDoc()))
+	//})
 	r.Run(":" + strconv.Itoa(global.Config.Server.Port))
 }
