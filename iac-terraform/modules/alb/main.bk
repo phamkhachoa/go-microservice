@@ -1,0 +1,173 @@
+# provider "kubernetes" {
+#   host                   = var.cluster_endpoint
+#   cluster_ca_certificate = base64decode(var.certificate_authority[0].data)
+#   token                  = data.aws_eks_cluster_auth.cluster.token
+# }
+#
+# provider "helm" {
+#   kubernetes {
+#     host                   = var.cluster_endpoint
+#     cluster_ca_certificate = base64decode(var.certificate_authority[0].data)
+#     token                  = data.aws_eks_cluster_auth.cluster.token
+#   }
+# }
+#
+# data "aws_eks_cluster_auth" "cluster" {
+#   name = var.cluster_name
+# }
+#
+# # In modules/iam/main.tf (or a dedicated file in your root if preferred)
+# resource "aws_iam_policy" "alb_controller_policy" {
+#   name        = "AWSLoadBalancerControllerIAMPolicy"
+#   description = "IAM policy for AWS Load Balancer Controller"
+#   policy      = file("iam_policy.json") # Make sure iam_policy.json is in the same directory or specify path
+# }
+#
+# # Create OIDC provider for the EKS cluster
+# data "aws_iam_policy_document" "aws_load_balancer_controller_assume_role_policy" {
+#   statement {
+#     actions = ["sts:AssumeRoleWithWebIdentity"]
+#     effect  = "Allow"
+#
+#     condition {
+#       test     = "StringEquals"
+#       variable = "${replace(var.eks_cluster.identity[0].oidc[0].issuer, "https://", "")}:sub"
+#       values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
+#     }
+#
+#     principals {
+#       identifiers = [
+#         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(var.eks_cluster.identity[0].oidc[0].issuer, "https://", "")}"
+#       ]
+#       type = "Federated"
+#     }
+#   }
+# }
+#
+# data "aws_caller_identity" "current" {}
+#
+# resource "aws_iam_role" "aws_load_balancer_controller" {
+#   assume_role_policy = data.aws_iam_policy_document.aws_load_balancer_controller_assume_role_policy.json
+#   name               = "${var.cluster_name}-alb-controller-role"
+# }
+#
+# resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" {
+#   policy_arn = aws_iam_policy.alb_controller_policy.arn
+#   role       = aws_iam_role.aws_load_balancer_controller.name
+# }
+#
+# # Deploy the AWS Load Balancer Controller via Helm
+# resource "helm_release" "aws_load_balancer_controller" {
+#   name       = "aws-load-balancer-controller"
+#   repository = "https://aws.github.io/eks-charts"
+#   chart      = "aws-load-balancer-controller"
+#   namespace  = "kube-system"
+#   version    = var.aws_load_balancer_controller_chart_version
+#
+#   set {
+#     name  = "clusterName"
+#     value = var.cluster_name
+#   }
+#
+#   set {
+#     name  = "serviceAccount.create"
+#     value = "true"
+#   }
+#
+#   set {
+#     name  = "serviceAccount.name"
+#     value = "aws-load-balancer-controller"
+#   }
+#
+#   set {
+#     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+#     value = aws_iam_role.aws_load_balancer_controller.arn
+#   }
+#
+#   depends_on = [
+#     aws_iam_role_policy_attachment.aws_load_balancer_controller_attach
+#   ]
+# }
+#
+# # Create Security Group for ALB
+# resource "aws_security_group" "alb" {
+#   name        = "${var.environment}-${var.go_service_name}-alb-sg"
+#   description = "Security group for ALB that serves ${var.go_service_name}"
+#   vpc_id      = var.vpc_id
+#
+#   ingress {
+#     from_port   = 80
+#     to_port     = 80
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#     description = "Allow HTTP traffic"
+#   }
+#
+#   ingress {
+#     from_port   = 443
+#     to_port     = 443
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#     description = "Allow HTTPS traffic"
+#   }
+#
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#     description = "Allow outbound traffic"
+#   }
+#
+#   tags = {
+#     Name        = "${var.environment}-${var.go_service_name}-alb-sg"
+#     Environment = var.environment
+#     Service     = var.go_service_name
+#   }
+# }
+#
+# # Data source to get the OIDC provider ARN from your EKS cluster
+# data "aws_iam_openid_connect_provider" "cluster" {
+#   # This assumes your EKS cluster name is correctly referenced
+#   # The ARN pattern is typically like arn:aws:iam::<account-id>:oidc-provider/oidc.eks.<region>.amazonaws.com/id/<oidc-id>
+#   # We need the issuer URL which is available as an attribute of the aws_eks_cluster resource.
+#   url = var.eks_cluster.identity[0].oidc[0].issuer
+# }
+#
+# # resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_policy" {
+# #   # Ensure the policy_arn here matches the ARN of the policy you created in the previous steps.
+# #   # Assuming you named the policy resource `aws_iam_policy.aws_load_balancer_controller`.
+# #   policy_arn = aws_iam_policy.alb_controller_policy.arn
+# #   role       = aws_iam_role.aws_load_balancer_controller.name
+# #
+# #   # Add a dependency to ensure the role and policy exist before trying to attach
+# #   depends_on = [
+# #     aws_iam_role.aws_load_balancer_controller,
+# #     aws_iam_policy.alb_controller_policy # Make sure this resource exists and is defined elsewhere
+# #   ]
+# # }
+#
+# # In your EKS main.tf (where you define the aws_eks_addon resource)
+#
+# # resource "aws_eks_addon" "aws_load_balancer_controller" {
+# #   cluster_name  = var.cluster_name # Reference your cluster resource
+# #   addon_name    = "aws-load-balancer-controller"
+# #   addon_version = "v2.7.0-eksbuild.1" # Use the latest compatible version
+# #   # Crucial: Provide the ARN of the IRSA role created in Step 1
+# #   service_account_role_arn    = aws_iam_role.aws_load_balancer_controller.arn
+# #   resolve_conflicts_on_create = "OVERWRITE"
+# #   resolve_conflicts_on_update = "PRESERVE"
+# #
+# #   tags = {
+# #     Project     = var.project_name
+# #     Environment = var.environment
+# #   }
+# #
+# #   # Add dependencies to ensure the cluster and the IAM role are ready
+# #   depends_on = [
+# #     var.eks_cluster,
+# #     aws_iam_role_policy_attachment.aws_load_balancer_controller_policy
+# #   ]
+# # }
+
+

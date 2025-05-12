@@ -1,0 +1,13 @@
+1. Enable OIDC Provider for your EKS Cluster (if not already enabled):
+
+oidc_id=$(aws eks describe-cluster --name your-eks-cluster-name --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
+echo $oidc_id
+aws iam list-open-id-connect-providers | grep $oidc_id
+
+If the grep command returns nothing, you need to create it:
+
+eksctl utils associate-iam-oidc-provider --cluster your-eks-cluster-name --approve
+
+2.
+
+curl -o iam_policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
