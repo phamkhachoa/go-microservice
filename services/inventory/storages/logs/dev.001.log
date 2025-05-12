@@ -192,3 +192,13 @@
 {"level":"INFO","time":"2025-05-07T23:24:08.619+0700","caller":"server/main.go:80","msg":"Starting gRPC server","port":"50051"}
 {"level":"INFO","time":"2025-05-07T23:24:43.564+0700","caller":"grpc/inventory_server.go:41","msg":"Received request for inventory by product ID","product_id":1}
 {"level":"INFO","time":"2025-05-07T23:24:43.565+0700","caller":"grpc/inventory_server.go:84","msg":"Successfully retrieved inventory","product_id":1,"quantity":245,"available":245}
+{"level":"INFO","time":"2025-05-11T23:01:19.011+0700","caller":"server/main.go:80","msg":"Starting gRPC server","port":"50051"}
+{"level":"INFO","time":"2025-05-11T23:01:19.011+0700","caller":"server/main.go:52","msg":"Starting HTTP server","port":"8081"}
+{"level":"INFO","time":"2025-05-11T23:01:27.877+0700","caller":"server/main.go:91","msg":"Shutting down servers..."}
+{"level":"INFO","time":"2025-05-11T23:01:27.877+0700","caller":"server/main.go:93","msg":"gRPC server stopped"}
+{"level":"INFO","time":"2025-05-11T23:01:27.877+0700","caller":"server/main.go:95","msg":"HTTP server stopped"}
+{"level":"INFO","time":"2025-05-11T23:02:56.614+0700","caller":"server/main.go:52","msg":"Starting HTTP server","port":"8080"}
+{"level":"INFO","time":"2025-05-11T23:02:56.614+0700","caller":"server/main.go:80","msg":"Starting gRPC server","port":"50051"}
+{"level":"INFO","time":"2025-05-11T23:03:00.225+0700","caller":"server/main.go:91","msg":"Shutting down servers..."}
+{"level":"INFO","time":"2025-05-11T23:03:00.226+0700","caller":"server/main.go:93","msg":"gRPC server stopped"}
+{"level":"INFO","time":"2025-05-11T23:03:00.226+0700","caller":"server/main.go:95","msg":"HTTP server stopped"}

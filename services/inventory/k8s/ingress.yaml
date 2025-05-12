@@ -1,0 +1,125 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-application-ingress  # Descriptive name for your Ingress resource
+  annotations:
+    # Required: Specify the AWS Load Balancer Controller as the ingress.class
+    kubernetes.io/ingress.class: alb
+
+    # ALB Scheme: 'internet-facing' for public access, 'internal' for VPC-only access
+    alb.ingress.kubernetes.io/scheme: internet-facing
+
+    # Target Type: 'ip' is recommended for EKS to target individual pod IPs
+    # 'instance' targets EC2 instance IPs (less flexible for dynamic pods)
+    alb.ingress.kubernetes.io/target-type: ip
+
+    # Listener Ports: Define the ports the ALB should listen on.
+    # Example: HTTP on 80 and HTTPS on 443.
+    # If you only need HTTP, you can use '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+
+    # --- Optional: HTTPS Configuration (Highly Recommended for Production) ---
+    # Specify the ARN of your ACM (AWS Certificate Manager) certificate for HTTPS.
+    # Replace with your actual certificate ARN.
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:YOUR_REGION:YOUR_ACCOUNT_ID:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+    # Optional: Redirect HTTP traffic to HTTPS.
+    # This creates a redirect rule on the HTTP listener to the HTTPS listener.
+    # alb.ingress.kubernetes.io/ssl-redirect: '443'
+
+    # --- Optional: ALB Subnet Configuration ---
+    # Specify specific subnet IDs for the ALB. These should be public subnets
+    # for 'internet-facing' ALBs and private subnets for 'internal' ALBs.
+    # If omitted, the controller will try to auto-discover suitable subnets.
+    # Example: Replace with actual subnet IDs from your Terraform VPC outputs.
+    # alb.ingress.kubernetes.io/subnets: "subnet-xxxxxxxxxxxxxxxxx,subnet-yyyyyyyyyyyyyyyyy"
+
+    # --- Optional: Security Group Configuration ---
+    # Specify existing Security Group IDs for the ALB.
+    # The controller will attach these to the ALB's network interfaces.
+    # If omitted, the controller will create and manage one.
+    # Example:
+    # alb.ingress.kubernetes.io/security-groups: "sg-xxxxxxxxxxxxxxxxx,sg-yyyyyyyyyyyyyyyyy"
+
+    # --- Optional: Tagging ---
+    # Add custom tags to the created ALB and its components (listeners, target groups).
+    # These tags are useful for cost allocation, management, and automation.
+    alb.ingress.kubernetes.io/tags: "Project=MyAwesomeProject,Environment=dev,ManagedBy=Kubernetes"
+
+    # --- Optional: Health Check Configuration ---
+    # Customize health checks for the ALB's target groups.
+    # These should align with your application's health endpoints.
+    # alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    # alb.ingress.kubernetes.io/healthcheck-port: traffic-port # or a specific port like '8080'
+    # alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    # alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+    # alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    # alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    # alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+
+    # --- Optional: WAF Integration ---
+    # Associate an AWS WAFv2 Web ACL with the ALB for security.
+    # Replace with your WAF ACL ARN.
+    # alb.ingress.kubernetes.io/wafv2-acl-arn: arn:aws:wafv2:YOUR_REGION:YOUR_ACCOUNT_ID:regional/webacl/YOUR_WEBACL_ID/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  labels:
+    app.kubernetes.io/part-of: go-microservice # Common label for grouping related resources
+
+spec:
+  rules:
+    # Rule 1: Path-based routing for '/app1'
+    # All requests starting with /app1 will be routed to 'app1-service' on port 80
+    - http:
+        paths:
+          - path: /inventory*
+            pathType: Prefix # Other options: Exact, ImplementationSpecific
+            backend:
+              service:
+                name: inventory-service # Kubernetes Service name
+                port:
+                  number: 80      # Port of the Kubernetes Service
+
+    # Rule 2: Path-based routing for '/app2'
+    # All requests starting with /app2 will be routed to 'app2-service' on port 80
+    - http:
+        paths:
+          - path: /product*
+            pathType: Prefix
+            backend:
+              service:
+                name: product-service
+                port:
+                  number: 80
+
+    # --- Optional: Host-based routing ---
+    # You can define different routing rules based on the hostname in the request.
+    # For this to work, you need to configure DNS (e.g., Route 53) to point
+    # your custom domain (e.g., app1.example.com) to the ALB's DNS name.
+    # - host: app1.example.com
+    #   http:
+    #     paths:
+    #     - path: /*
+    #       pathType: Prefix
+    #       backend:
+    #         service:
+    #           name: app1-service
+    #           port:
+    #             number: 80
+    # - host: app2.example.com
+    #   http:
+    #     paths:
+    #     - path: /*
+    #       pathType: Prefix
+    #       backend:
+    #         service:
+    #           name: app2-service
+    #           port:
+    #             number: 80
+
+  # --- Optional: Default Backend ---
+  # If no rules match, traffic can be routed to a default service.
+  # This is useful for a "catch-all" or error page.
+  # defaultBackend:
+  #   service:
+  #     name: default-error-service # Replace with your default service name
+  #     port:
+  #       number: 80
