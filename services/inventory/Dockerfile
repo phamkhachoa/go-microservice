@@ -1,4 +1,5 @@
-FROM golang:alpine AS builder
+# Build stage with explicit platform
+FROM --platform=linux/amd64 golang:alpine AS builder
 
 WORKDIR /app
 
@@ -6,14 +7,20 @@ COPY . .
 
 RUN go mod download
 
-RUN go build -o main ./cmd/server/
+# Explicitly set build for Linux AMD64
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main ./cmd/server/
 
-FROM scratch
+# Use distroless or alpine for runtime to have basic utilities
+FROM --platform=linux/amd64 alpine:latest
 
 WORKDIR /
 COPY --from=builder /app/main .
 
 COPY ./config /config
 COPY ./.env .
+COPY ./locales /locales
+
+# Make sure the binary is executable
+RUN chmod +x /main
 
 ENTRYPOINT ["/main"]

@@ -1,38 +1,35 @@
-version: '3.9'
-
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql_container
-    environment:
-      MYSQL_ROOT_PASSWORD: root1234
-      MYSQL_DATABASE: shopdevgo
-      MYSQL_USER: shopdevgo
-      MYSQL_PASSWORD: 123456aA@
-    ports:
-      - "33306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./init:/docker-entrypoint-initdb.d
+#  mysql:
+#    image: mysql:8.0
+#    container_name: mysql_container
+#    environment:
+#      MYSQL_ROOT_PASSWORD: root1234
+#      MYSQL_DATABASE: shopdevgo
+#      MYSQL_USER: shopdevgo
+#      MYSQL_PASSWORD: 123456aA@
+#    ports:
+#      - "33306:3306"
+#    volumes:
+#      - mysql_data:/var/lib/mysql
+#      - ./init:/docker-entrypoint-initdb.d
+#
+#  redis:
+#    image: redis:7.0
+#    container_name: redis_container
+#    ports:
+#      - "6381:6379"
+#    volumes:
+#      - redis_data:/data
 
-  redis:
-    image: redis:7.0
-    container_name: redis_container
-    ports:
-      - "6381:6379"
-    volumes:
-      - redis_data:/data
-  crm.shopdev.com:
-    container_name: go_backend_crm_shopdev
-    build:
-      context: .
-      dockerfile: Dockerfile
+  inventory-app:
+    image: go-microservice/inventory
+    container_name: inventory-app
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
     restart: always
-    depends_on:
-      - mysql
-      - redis
     ports:
-      - "8002:8002"
+      - "8080:8080"
 
 
 volumes:

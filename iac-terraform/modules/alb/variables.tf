@@ -20,6 +20,11 @@ variable "cluster_endpoint" {
   type        = string
 }
 
+variable "eks_cluster" {
+  description = "Endpoint of the EKS cluster"
+  type        = any
+}
+
 variable "cluster_certificate_authority_data" {
   description = "Certificate authority data for the EKS cluster"
   type        = string

@@ -7,10 +7,10 @@ output "alb_security_group_id" {
 
 output "alb_controller_role_arn" {
   description = "IAM Role ARN for ALB Controller"
-  value       = aws_iam_role.lb_controller.arn
+  value       = aws_iam_role.aws-load-balancer-controller.arn
 }
 
 output "alb_controller_policy_arn" {
   description = "IAM Policy ARN for ALB Controller"
-  value       = aws_iam_policy.alb_controller_policy.arn
+  value       = aws_iam_policy.aws-load-balancer-controller.arn
 }

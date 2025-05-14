@@ -24,11 +24,11 @@ output "eks_cluster" {
   value       = aws_eks_cluster.main
 }
 
-# Output the OIDC Provider ARN for reference
-output "oidc_provider_arn" {
-  description = "The ARN of the IAM OIDC provider for the EKS cluster."
-  value       = aws_iam_openid_connect_provider.my_cluster_oidc_provider.arn
-}
+# # Output the OIDC Provider ARN for reference
+# output "oidc_provider_arn" {
+#   description = "The ARN of the IAM OIDC provider for the EKS cluster."
+#   value       = aws_iam_openid_connect_provider.my_cluster_oidc_provider.arn
+# }
 
 output "cluster_certificate_authority_data" {
   description = "Base64 encoded certificate data required to communicate with the cluster"

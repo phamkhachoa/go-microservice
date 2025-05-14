@@ -25,77 +25,77 @@ locals {
   oidc_provider = replace(var.oidc_provider_url, "https://", "")
 }
 
-# Create IAM policy for ALB controller
-resource "aws_iam_policy" "alb_controller_policy" {
-  provider    = aws.alb
-  name        = "AWSLoadBalancerControllerIAMPolicy-${var.cluster_name}"
-  description = "Policy for ALB Ingress Controller for cluster ${var.cluster_name}"
+data "tls_certificate" "my_cluster_issuer" {
+  url = var.eks_cluster.identity[0].oidc[0].issuer
+}
 
+# Create an IAM OIDC Identity Provider that trusts the EKS cluster's issuer URL
+resource "aws_iam_openid_connect_provider" "eks" {
+  url =var.eks_cluster.identity[0].oidc[0].issuer
+
+  client_id_list = [
+    "sts.amazonaws.com",
+  ]
+
+  thumbprint_list = [
+    data.tls_certificate.my_cluster_issuer.certificates[0].sha1_fingerprint,
+  ]
+}
+
+#it allows IAM roles to trust and authenticate using the OpenID Connect (OIDC) protocol
+data "aws_iam_policy_document" "aws_load_balancer_controller_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
+    }
+
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.eks.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+# Create IAM role for the ALB controller
+resource "aws_iam_role" "aws-load-balancer-controller" {
+  assume_role_policy = data.aws_iam_policy_document.aws_load_balancer_controller_assume_role_policy.json
+  name               = "aws-load-balancer-controller"
+}
+
+# Create IAM policy for ALB controller
+resource "aws_iam_policy" "aws-load-balancer-controller" {
+  name   = "AWSLoadBalancerController"
   # The policy document is in a separate file in the root module
   policy = file("${path.root}/iam_policy.json")
 }
 
-# Create IAM role for the ALB controller
-resource "aws_iam_role" "lb_controller" {
-  provider = aws.alb
-  name     = "eks-alb-ingress-controller-${var.cluster_name}"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${local.oidc_provider}"
-        }
-        Action = "sts:AssumeRoleWithWebIdentity"
-        Condition = {
-          StringEquals = {
-            "${local.oidc_provider}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
-          }
-        }
-      }
-    ]
-  })
-}
-
 # Attach ALB controller policy to the role
-resource "aws_iam_role_policy_attachment" "lb_controller" {
-  provider   = aws.alb
-  policy_arn = aws_iam_policy.alb_controller_policy.arn
-  role       = aws_iam_role.lb_controller.name
+resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller_attach" {
+  role       = aws_iam_role.aws-load-balancer-controller.name
+  policy_arn = aws_iam_policy.aws-load-balancer-controller.arn
 }
 
 # Install the AWS Load Balancer Controller using Helm
-resource "helm_release" "lb_controller" {
-  name       = "aws-load-balancer-controller"
-  repository = "https://aws.github.io/eks-charts"
-  chart      = "aws-load-balancer-controller"
-  namespace  = "kube-system"
-  version    = "1.6.0" # Check for the latest version
+resource "helm_release" "aws-load-balancer-controller" {
+  name             = "aws-load-balancer-controller"
+  repository       = "https://aws.github.io/eks-charts"
+  chart            = "aws-load-balancer-controller"
+  namespace        = "kube-system"
+  version          = "1.4.1"
+  create_namespace = true
 
-  set {
-    name  = "clusterName"
-    value = var.cluster_name
-  }
-
-  set {
-    name  = "serviceAccount.create"
-    value = "true"
-  }
-
-  set {
-    name  = "serviceAccount.name"
-    value = "aws-load-balancer-controller"
-  }
-
+  values = [
+    file("./ingress.yaml")
+  ]
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.lb_controller.arn
+    value = aws_iam_role.aws-load-balancer-controller.arn
   }
-
-  # Wait for the load balancer controller to be fully deployed
-  wait = true
 }
 
 # Create security group for the ALB

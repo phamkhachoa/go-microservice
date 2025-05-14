@@ -79,20 +79,3 @@ resource "aws_eks_node_group" "main" {
     aws_iam_role_policy_attachment.node_policy
   ]
 }
-
-data "tls_certificate" "my_cluster_issuer" {
-  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
-}
-
-# Create an IAM OIDC Identity Provider that trusts the EKS cluster's issuer URL
-resource "aws_iam_openid_connect_provider" "my_cluster_oidc_provider" {
-  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
-
-  client_id_list = [
-    "sts.amazonaws.com",
-  ]
-
-  thumbprint_list = [
-    data.tls_certificate.my_cluster_issuer.certificates[0].sha1_fingerprint,
-  ]
-}

@@ -35,16 +35,9 @@ module "eks" {
 
 module "database" {
   source = "./modules/database"
-
-  environment = var.environment
-  vpc_id      = module.vpc.vpc_id
-  subnet_ids  = module.vpc.public_subnet_ids
-
-  allowed_cidr_blocks = [module.vpc.vpc_cidr_block]
-
-  database_name   = "mydb"
-  master_username = "admin"
   region = var.region
+  subnet_ids = module.vpc.public_subnet_ids
+  vpc_id = module.vpc.vpc_id
 }
 
 # Now use the outputs from EKS module as inputs to the ALB module
@@ -59,6 +52,7 @@ module "alb" {
   cluster_endpoint = module.eks.cluster_endpoint
   cluster_certificate_authority_data = module.eks.cluster_certificate_authority_data
   oidc_provider_url = module.eks.oidc_provider_url
+  eks_cluster = module.eks.eks_cluster
 
   # Make sure the ALB module depends on the EKS module
   # depends_on = [module.eks]
