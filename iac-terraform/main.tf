@@ -58,4 +58,12 @@ module "alb" {
   # depends_on = [module.eks]
 }
 
+module "elasticache" {
+  source = "./modules/elasticache"
+  regison = var.region
+  subnet_ids = module.vpc.private_subnet_ids
+  vpc_cidr =  module.vpc.private_subnet_ids
+  vpc_id = module.vpc.vpc_id
+}
+
 
