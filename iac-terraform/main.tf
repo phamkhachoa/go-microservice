@@ -66,4 +66,8 @@ module "elasticache" {
   vpc_id = module.vpc.vpc_id
 }
 
-
+module "s3" {
+  source = "./modules/s3"
+  bucket_name = "hpk-go-microservice-fe"
+  region = var.region
+}

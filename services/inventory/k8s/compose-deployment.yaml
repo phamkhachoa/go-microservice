@@ -38,11 +38,11 @@ spec:
             - name: MYSQL_DBNAME
               value: "mydb"
             - name: REDIS_HOST
-              value: "root"
+              value: "redis-free-tier.5aypkj.0001.apne1.cache.amazonaws.com"
             - name: REDIS_PORT
-              value: "password"
+              value: "6379"
             - name: REDIS_PASSWORD
-              value: "inventory"
+              value: ""
           resources:
             limits:
               cpu: 500m
@@ -76,26 +76,30 @@ spec:
     app: inventory-app
 ---
 # Ingress resource using the AWS ALB Ingress Controller
-#apiVersion: networking.k8s.io/v1
-#kind: Ingress
-#metadata:
-#  name: go-microservice-ingress
-#  annotations:
-#    alb.ingress.kubernetes.io/scheme: internet-facing
-#    alb.ingress.kubernetes.io/target-type: ip
-#spec:
-#  ingressClassName: alb
-#  rules:
-#    - host: go.microservice.com
-#      http:
-#        paths:
-#          - path: "/api/inventory/v0"
-#            pathType: Prefix
-#            backend:
-#              service:
-#                name: inventory-service
-#                port:
-#                  number: 80
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: go-microservice-ingress
+  annotations:
+    alb.ingress.kubernetes.io/cors-allow-origins: '*'
+    alb.ingress.kubernetes.io/cors-allow-methods: 'GET, POST, PUT, DELETE, OPTIONS'
+    alb.ingress.kubernetes.io/cors-allow-headers: 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization'
+    alb.ingress.kubernetes.io/cors-allow-credentials: 'true'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  ingressClassName: alb
+  rules:
+    - host: d2xjcju5cw0ag.cloudfront.net
+      http:
+        paths:
+          - path: "/api/inventory/v0"
+            pathType: Prefix
+            backend:
+              service:
+                name: inventory-service
+                port:
+                  number: 80
 
   # Optional: Default backend for requests that don't match any path
   # defaultBackend:

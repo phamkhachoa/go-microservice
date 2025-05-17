@@ -1,5 +1,5 @@
 # Build stage with explicit platform
-FROM --platform=linux/amd64 golang:alpine AS builder
+FROM golang:alpine AS builder
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main ./cmd/server/
 
 # Use distroless or alpine for runtime to have basic utilities
-FROM --platform=linux/amd64 alpine:latest
+FROM alpine:latest
 
 WORKDIR /
 COPY --from=builder /app/main .

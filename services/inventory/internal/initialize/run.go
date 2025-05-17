@@ -12,8 +12,8 @@ func Run() *gin.Engine {
 	LoadConfig("./config/config.yaml", "./.env")
 	fmt.Println("Loading configuration mysql", global.Config.Mysql.Username)
 	InitLogger()
-	//InitMysql()
-	//InitRedis()
+	InitMysql()
+	InitRedis()
 	i18n.Init()
 
 	r := InitRouter()
